@@ -1,3 +1,7 @@
+import type { DailyRestaurantEntry } from './types/restaurant'
+
+export type { DailyRestaurantEntry, Restaurant } from './types/restaurant'
+
 /** How a dish was added to a day's list. */
 export type DishSource = 'generated' | 'custom' | 'matched'
 
@@ -28,6 +32,10 @@ export interface UlamDiaryState {
   excludedDishes: string[]
   /** User-added dishes permanently available for random generation. */
   customPool: string[]
+  /** Accepted eating-out restaurants by day (newest first). */
+  eatingOut: DailyRestaurantEntry[]
+  /** Restaurant ids removed from the current generation pool. */
+  excludedRestaurantIds: string[]
 }
 
 /** Legacy single-dish history shape (pre multi-ulam update). */

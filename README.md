@@ -39,10 +39,10 @@ Then open the local URL shown in the terminal (usually `http://localhost:5173`).
 
 ## How it works
 
-1. Click **Ulam for Today** to get a random dish.
+1. Tap the plate icon, then **Cook at Home** for a random dish (or **Dine Out** for a restaurant).
 2. Tap **X** to reject and get another suggestion (same dish won’t repeat in a row when others are available).
-3. Tap the **checkmark** to save today’s ulam.
-4. Returning on the same day shows your saved choice; a new day lets you choose again.
+3. Tap the **checkmark** to save to **Today’s Table** (or **Restaurant Pick**).
+4. Returning on the same day shows your saved choices; a new day lets you choose again.
 5. Use **Reset Ulam List** to restore all dishes to the random pool without clearing history.
 
 Data is stored only in your browser via `localStorage`.

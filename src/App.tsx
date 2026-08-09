@@ -1,12 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
+import { type GeneratorMode } from './components/ActionArea'
+import { CurrentUlamToday } from './components/CurrentUlamToday'
+import { DayToolbar } from './components/DayToolbar'
+import { EatingOutToday } from './components/EatingOutToday'
 import { Header } from './components/Header'
-import { UlamGenerator } from './components/UlamGenerator'
-import { UlamHistory } from './components/UlamHistory'
+import {
+  type PastPickItem,
+  type PastPicksDay,
+  UlamHistory,
+} from './components/UlamHistory'
 import { ResetButton } from './components/ResetButton'
 import type {
   DailyUlamEntry,
   DayDish,
   PoolAddResult,
+  Restaurant,
   UlamDiaryState,
 } from './types'
 import { getTodayKey } from './utils/dates'
@@ -17,6 +25,7 @@ import {
   getFullDishPool,
   isExcluded,
   normalizeDishInput,
+  restoresToPool,
   sameDishName,
 } from './utils/dishes'
 import { pickRandomDish } from './utils/random'
@@ -96,6 +105,12 @@ export default function App() {
   const [previousSuggestion, setPreviousSuggestion] = useState<string | null>(
     null,
   )
+  /** One shared center slot: idle, ulam generator, or eating out. */
+  const [generatorMode, setGeneratorMode] = useState<GeneratorMode>('idle')
+  /** Plate menu — mutually exclusive with write form and generators. */
+  const [menuOpen, setMenuOpen] = useState(false)
+  /** Write Your Own Ulam — mutually exclusive with plate menu and generators. */
+  const [writeOpen, setWriteOpen] = useState(false)
 
   // Keep a backup sync in case any update path misses an immediate write.
   useEffect(() => {
@@ -154,29 +169,131 @@ export default function App() {
     )
   }, [state.excludedDishes, dishPool, todaysDishes])
 
-  const previousEntries = useMemo(
-    () => state.history.filter((entry) => entry.date !== todayKey),
-    [state.history, todayKey],
+  const todaysRestaurant = useMemo(
+    () => state.eatingOut.find((entry) => entry.date === todayKey) ?? null,
+    [state.eatingOut, todayKey],
   )
+
+  /** Previous days only — dishes and restaurants, names only. */
+  const pastPicks = useMemo((): PastPicksDay[] => {
+    const dates = new Set<string>()
+    for (const entry of state.history) {
+      if (entry.date !== todayKey) dates.add(entry.date)
+    }
+    for (const entry of state.eatingOut) {
+      if (entry.date !== todayKey) dates.add(entry.date)
+    }
+
+    return Array.from(dates)
+      .sort((a, b) => (a < b ? 1 : a > b ? -1 : 0))
+      .map((date) => {
+        const dishes = state.history.find((entry) => entry.date === date)?.dishes ?? []
+        const restaurantEntry = state.eatingOut.find(
+          (entry) => entry.date === date,
+        )
+        const items: PastPickItem[] = [
+          ...dishes.map((dish) => ({
+            kind: 'dish' as const,
+            name: dish.name,
+            id: dish.name,
+            restoresToPool: restoresToPool(dish),
+          })),
+          ...(restaurantEntry
+            ? [
+                {
+                  kind: 'restaurant' as const,
+                  name: restaurantEntry.restaurant.name,
+                  id: restaurantEntry.restaurant.id,
+                  restoresToPool: true,
+                },
+              ]
+            : []),
+        ]
+        return { date, items }
+      })
+      .filter((day) => day.items.length > 0)
+  }, [state.history, state.eatingOut, todayKey])
 
   const allTried = availableDishes.length === 0
 
   function generateSuggestion(avoid: string | null = previousSuggestion) {
     const next = pickRandomDish(availableDishes, avoid)
     setSuggestion(next)
-    if (next) setPreviousSuggestion(next)
+    if (next) {
+      setPreviousSuggestion(next)
+      setGeneratorMode('ulam')
+    } else {
+      setGeneratorMode('idle')
+    }
+  }
+
+  /** Exit generator/menu without accept or reject — suggestion is discarded. */
+  function clearInteraction() {
+    setSuggestion(null)
+    setGeneratorMode('idle')
+    setMenuOpen(false)
   }
 
   function handleGenerate() {
-    generateSuggestion(null)
-  }
-
-  function handleAddAnother() {
+    setWriteOpen(false)
+    setMenuOpen(false)
     generateSuggestion(null)
   }
 
   function handleDismissSuggestion() {
+    clearInteraction()
+    setWriteOpen(false)
+  }
+
+  function handleOpenEatingOut() {
+    setWriteOpen(false)
     setSuggestion(null)
+    setMenuOpen(false)
+    setGeneratorMode('eating-out')
+  }
+
+  function handleCloseEatingOut() {
+    setGeneratorMode('idle')
+    setMenuOpen(false)
+    setWriteOpen(false)
+  }
+
+  /** Close write, plate menu, and generators — default home state. */
+  function handleGoHome() {
+    setWriteOpen(false)
+    clearInteraction()
+  }
+
+  function handleToggleWrite() {
+    if (writeOpen) {
+      setWriteOpen(false)
+      return
+    }
+    // Close plate menu / generator without saving or rejecting.
+    clearInteraction()
+    setWriteOpen(true)
+  }
+
+  function handleCloseWrite() {
+    setWriteOpen(false)
+  }
+
+  function handleTogglePlate() {
+    setWriteOpen(false)
+
+    const generating =
+      generatorMode === 'eating-out' ||
+      (generatorMode === 'ulam' && Boolean(suggestion))
+
+    if (generating) {
+      // Exit generator quietly, then show plate options.
+      setSuggestion(null)
+      setGeneratorMode('idle')
+      setMenuOpen(true)
+      return
+    }
+
+    setMenuOpen((open) => !open)
   }
 
   function handleReject() {
@@ -204,6 +321,9 @@ export default function App() {
     })
 
     setSuggestion(null)
+    setGeneratorMode('idle')
+    setMenuOpen(false)
+    setWriteOpen(false)
   }
 
   /**
@@ -286,6 +406,9 @@ export default function App() {
     }))
     setSuggestion(null)
     setPreviousSuggestion(null)
+    setGeneratorMode('idle')
+    setMenuOpen(false)
+    setWriteOpen(false)
   }
 
   function handleDeleteDish(date: string, dishName: string) {
@@ -311,6 +434,33 @@ export default function App() {
         ),
       }
     })
+  }
+
+  function handleDeletePastRestaurant(date: string, restaurantId: string) {
+    if (date === todayKey) return
+
+    commitState((prev) => {
+      const eatingOut = prev.eatingOut.filter((entry) => entry.date !== date)
+      const stillElsewhere = eatingOut.some(
+        (entry) => entry.restaurant.id === restaurantId,
+      )
+
+      return {
+        ...prev,
+        eatingOut,
+        excludedRestaurantIds: stillElsewhere
+          ? prev.excludedRestaurantIds
+          : prev.excludedRestaurantIds.filter((id) => id !== restaurantId),
+      }
+    })
+  }
+
+  function handleDeletePastPick(date: string, item: PastPickItem) {
+    if (item.kind === 'dish') {
+      handleDeleteDish(date, item.id)
+      return
+    }
+    handleDeletePastRestaurant(date, item.id)
   }
 
   /**
@@ -344,26 +494,90 @@ export default function App() {
     )
   }
 
+  function handleAcceptRestaurant(restaurant: Restaurant, location: string) {
+    commitState((prev) => {
+      const entry = {
+        date: todayKey,
+        location,
+        restaurant,
+      }
+
+      return {
+        ...prev,
+        eatingOut: [
+          entry,
+          ...prev.eatingOut.filter((item) => item.date !== todayKey),
+        ],
+        excludedRestaurantIds: prev.excludedRestaurantIds.includes(
+          restaurant.id,
+        )
+          ? prev.excludedRestaurantIds
+          : [...prev.excludedRestaurantIds, restaurant.id],
+      }
+    })
+  }
+
+  /**
+   * Swipe-remove Eating Out Today:
+   * clear today, persist immediately, and return restaurant to the pool.
+   */
+  function handleRemoveTodayRestaurant() {
+    commitState((prev) => {
+      const entry = prev.eatingOut.find((item) => item.date === todayKey)
+      if (!entry) return prev
+
+      const restaurantId = entry.restaurant.id
+      const eatingOut = prev.eatingOut.filter((item) => item.date !== todayKey)
+      const stillElsewhere = eatingOut.some(
+        (item) => item.restaurant.id === restaurantId,
+      )
+
+      return {
+        ...prev,
+        eatingOut,
+        excludedRestaurantIds: stillElsewhere
+          ? prev.excludedRestaurantIds
+          : prev.excludedRestaurantIds.filter((id) => id !== restaurantId),
+      }
+    })
+  }
+
   return (
     <div className="app">
-      <Header
+      <Header />
+      <DayToolbar
+        writeOpen={writeOpen}
+        menuOpen={menuOpen}
+        mode={generatorMode}
+        suggestion={suggestion}
+        allTried={allTried}
         dishPool={dishPool}
         todaysDishes={todaysDishNames}
+        todaysRestaurant={todaysRestaurant}
+        excludedRestaurantIds={state.excludedRestaurantIds}
+        onGoHome={handleGoHome}
+        onToggleWrite={handleToggleWrite}
+        onCloseWrite={handleCloseWrite}
+        onTogglePlate={handleTogglePlate}
         onAddCustomUlam={handleAddCustomUlam}
         onAddToPool={handleAddToPool}
-      />
-      <UlamGenerator
-        suggestion={suggestion}
-        todaysDishes={todaysDishNames}
-        allTried={allTried}
         onGenerate={handleGenerate}
-        onAddAnother={handleAddAnother}
+        onOpenEatingOut={handleOpenEatingOut}
         onReject={handleReject}
         onAccept={handleAccept}
         onDismissSuggestion={handleDismissSuggestion}
-        onRemoveTodayDish={handleRemoveTodayDish}
+        onCloseEatingOut={handleCloseEatingOut}
+        onAcceptRestaurant={handleAcceptRestaurant}
       />
-      <UlamHistory entries={previousEntries} onDeleteDish={handleDeleteDish} />
+      <CurrentUlamToday
+        dishes={todaysDishNames}
+        onRemove={handleRemoveTodayDish}
+      />
+      <EatingOutToday
+        entry={todaysRestaurant}
+        onRemove={handleRemoveTodayRestaurant}
+      />
+      <UlamHistory days={pastPicks} onDeleteItem={handleDeletePastPick} />
       <ResetButton onReset={handleResetList} />
     </div>
   )

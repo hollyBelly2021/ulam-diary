@@ -1,0 +1,180 @@
+.area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: var(--space-sm);
+}
+
+.iconRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.15rem;
+}
+
+/* Shared nav icons: home, write, plate */
+.navIcon {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: #9a9188;
+  opacity: 0.88;
+  transition:
+    color var(--transition),
+    border-color var(--transition),
+    background var(--transition),
+    transform var(--transition),
+    opacity var(--transition);
+}
+
+.navIcon:hover {
+  color: var(--color-ink-muted);
+  background: rgba(44, 38, 34, 0.03);
+  border-color: var(--color-line-soft);
+  opacity: 1;
+  transform: scale(1.06);
+}
+
+.navIcon:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+.iconActive {
+  color: var(--color-ink-muted);
+  background: rgba(44, 38, 34, 0.03);
+  border-color: var(--color-line-soft);
+  opacity: 1;
+}
+
+.navGlyph {
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.45;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.menu {
+  display: grid;
+  grid-template-rows: 0fr;
+  width: min(100%, 16.5rem);
+  margin-top: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    grid-template-rows 280ms ease,
+    opacity 240ms ease,
+    transform 280ms ease,
+    margin-top 280ms ease;
+}
+
+.menuOpen {
+  grid-template-rows: 1fr;
+  margin-top: var(--space-sm);
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.menuInner {
+  overflow: hidden;
+  min-height: 0;
+  pointer-events: none;
+}
+
+.menuOpen .menuInner {
+  pointer-events: auto;
+}
+
+.buttonStack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-sm);
+  padding-bottom: 0.15rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  appearance: none;
+  width: 100%;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  padding: 0.85rem 1.6rem;
+  border-radius: var(--radius-md);
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    color var(--transition),
+    transform var(--transition),
+    opacity var(--transition);
+}
+
+.primaryButton {
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: #fffaf6;
+  box-shadow: var(--shadow-soft);
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  transform: translateY(-1px);
+}
+
+.primaryButton:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.primaryButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-soft);
+}
+
+.secondaryButton:hover:not(:disabled) {
+  border-color: var(--color-ink-muted);
+  background: rgba(44, 38, 34, 0.03);
+  transform: translateY(-1px);
+}
+
+.secondaryButton:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.hint {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: var(--color-ink-muted);
+  text-align: center;
+  line-height: 1.35;
+}
+
+.generatorSlot {
+  position: relative;
+  width: 100%;
+  min-height: 10.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--space-sm);
+}
