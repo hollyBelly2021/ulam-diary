@@ -13,7 +13,7 @@
   gap: 1.15rem;
 }
 
-/* Shared nav icons: home, write, plate */
+/* Shared nav icons: home, write, plate, past picks */
 .navIcon {
   appearance: none;
   display: inline-flex;

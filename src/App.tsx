@@ -7,7 +7,6 @@ import { Header } from './components/Header'
 import {
   type PastPickItem,
   type PastPicksDay,
-  UlamHistory,
 } from './components/UlamHistory'
 import { ResetButton } from './components/ResetButton'
 import type {
@@ -107,10 +106,12 @@ export default function App() {
   )
   /** One shared center slot: idle, ulam generator, or eating out. */
   const [generatorMode, setGeneratorMode] = useState<GeneratorMode>('idle')
-  /** Plate menu — mutually exclusive with write form and generators. */
+  /** Plate menu — mutually exclusive with write, past picks, and generators. */
   const [menuOpen, setMenuOpen] = useState(false)
-  /** Write Your Own Ulam — mutually exclusive with plate menu and generators. */
+  /** Write Your Own Dish — mutually exclusive with other center panels. */
   const [writeOpen, setWriteOpen] = useState(false)
+  /** Past Picks panel — mutually exclusive with other center panels. */
+  const [pastPicksOpen, setPastPicksOpen] = useState(false)
 
   // Keep a backup sync in case any update path misses an immediate write.
   useEffect(() => {
@@ -236,6 +237,7 @@ export default function App() {
 
   function handleGenerate() {
     setWriteOpen(false)
+    setPastPicksOpen(false)
     setMenuOpen(false)
     generateSuggestion(null)
   }
@@ -243,10 +245,12 @@ export default function App() {
   function handleDismissSuggestion() {
     clearInteraction()
     setWriteOpen(false)
+    setPastPicksOpen(false)
   }
 
   function handleOpenEatingOut() {
     setWriteOpen(false)
+    setPastPicksOpen(false)
     setSuggestion(null)
     setMenuOpen(false)
     setGeneratorMode('eating-out')
@@ -256,11 +260,13 @@ export default function App() {
     setGeneratorMode('idle')
     setMenuOpen(false)
     setWriteOpen(false)
+    setPastPicksOpen(false)
   }
 
-  /** Close write, plate menu, and generators — default home state. */
+  /** Close all center panels — default home state. */
   function handleGoHome() {
     setWriteOpen(false)
+    setPastPicksOpen(false)
     clearInteraction()
   }
 
@@ -269,8 +275,9 @@ export default function App() {
       setWriteOpen(false)
       return
     }
-    // Close plate menu / generator without saving or rejecting.
+    // Close plate / past picks / generator without saving or rejecting.
     clearInteraction()
+    setPastPicksOpen(false)
     setWriteOpen(true)
   }
 
@@ -280,6 +287,7 @@ export default function App() {
 
   function handleTogglePlate() {
     setWriteOpen(false)
+    setPastPicksOpen(false)
 
     const generating =
       generatorMode === 'eating-out' ||
@@ -294,6 +302,16 @@ export default function App() {
     }
 
     setMenuOpen((open) => !open)
+  }
+
+  function handleTogglePastPicks() {
+    if (pastPicksOpen) {
+      setPastPicksOpen(false)
+      return
+    }
+    clearInteraction()
+    setWriteOpen(false)
+    setPastPicksOpen(true)
   }
 
   function handleReject() {
@@ -324,6 +342,7 @@ export default function App() {
     setGeneratorMode('idle')
     setMenuOpen(false)
     setWriteOpen(false)
+    setPastPicksOpen(false)
   }
 
   /**
@@ -409,6 +428,7 @@ export default function App() {
     setGeneratorMode('idle')
     setMenuOpen(false)
     setWriteOpen(false)
+    setPastPicksOpen(false)
   }
 
   function handleDeleteDish(date: string, dishName: string) {
@@ -548,6 +568,8 @@ export default function App() {
       <DayToolbar
         writeOpen={writeOpen}
         menuOpen={menuOpen}
+        pastPicksOpen={pastPicksOpen}
+        pastPicks={pastPicks}
         mode={generatorMode}
         suggestion={suggestion}
         allTried={allTried}
@@ -559,6 +581,8 @@ export default function App() {
         onToggleWrite={handleToggleWrite}
         onCloseWrite={handleCloseWrite}
         onTogglePlate={handleTogglePlate}
+        onTogglePastPicks={handleTogglePastPicks}
+        onDeletePastPick={handleDeletePastPick}
         onAddCustomUlam={handleAddCustomUlam}
         onAddToPool={handleAddToPool}
         onGenerate={handleGenerate}
@@ -569,15 +593,18 @@ export default function App() {
         onCloseEatingOut={handleCloseEatingOut}
         onAcceptRestaurant={handleAcceptRestaurant}
       />
-      <CurrentUlamToday
-        dishes={todaysDishNames}
-        onRemove={handleRemoveTodayDish}
-      />
-      <EatingOutToday
-        entry={todaysRestaurant}
-        onRemove={handleRemoveTodayRestaurant}
-      />
-      <UlamHistory days={pastPicks} onDeleteItem={handleDeletePastPick} />
+      {!pastPicksOpen && (
+        <>
+          <CurrentUlamToday
+            dishes={todaysDishNames}
+            onRemove={handleRemoveTodayDish}
+          />
+          <EatingOutToday
+            entry={todaysRestaurant}
+            onRemove={handleRemoveTodayRestaurant}
+          />
+        </>
+      )}
       <ResetButton onReset={handleResetList} />
     </div>
   )

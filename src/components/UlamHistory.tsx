@@ -29,12 +29,12 @@ interface UlamHistoryProps {
   onDeleteItem: (date: string, item: PastPickItem) => void
 }
 
-/** Universal history of past ulam dishes and restaurants (names only). */
+/** Past Picks panel shown in the shared center content area. */
 export function UlamHistory({ days, onDeleteItem }: UlamHistoryProps) {
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null)
 
   return (
-    <section className={styles.section} aria-labelledby="past-picks-heading">
+    <section className={styles.panel} aria-labelledby="past-picks-heading">
       <h2 id="past-picks-heading" className={styles.title}>
         Past Picks
       </h2>

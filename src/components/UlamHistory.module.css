@@ -1,44 +1,50 @@
-.section {
-  margin-top: var(--space-sm);
+.panel {
+  width: 100%;
+  max-width: 22rem;
+  margin: var(--space-sm) auto 0;
+  text-align: center;
+  animation: panel-in 200ms ease both;
 }
 
 .title {
-  margin: 0 0 var(--space-md);
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 600;
-  text-align: center;
-  letter-spacing: 0.03em;
-  color: var(--color-ink);
+  margin: 0 0 var(--space-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
 }
 
 .empty {
   margin: 0;
-  text-align: center;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--color-line-soft);
+  border-bottom: 1px solid var(--color-line-soft);
   font-size: 0.95rem;
   color: var(--color-ink-muted);
+  line-height: 1.45;
+  text-align: center;
 }
 
 .list {
   list-style: none;
   margin: 0;
   padding: 0;
-}
-
-.item {
-  padding: var(--space-sm) 0;
-  border-bottom: 1px solid var(--color-line-soft);
-}
-
-.item:first-child {
   border-top: 1px solid var(--color-line-soft);
 }
 
+.item {
+  padding: 0.85rem 0 0.35rem;
+  border-bottom: 1px solid var(--color-line-soft);
+}
+
 .date {
-  margin: 0 0 0.35rem;
-  font-size: 0.85rem;
+  margin: 0 0 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--color-ink-muted);
-  letter-spacing: 0.02em;
 }
 
 .dishList {
@@ -48,37 +54,40 @@
 }
 
 .dishRow {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
-  padding: 0.35rem 0;
-  border-top: 1px solid var(--color-line-soft);
-}
-
-.dishRow:first-child {
-  border-top: none;
-  padding-top: 0;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
 }
 
 .name {
-  margin: 0;
+  display: block;
+  margin: 0 auto;
+  max-width: 80%;
+  padding: 16px 0;
   font-family: var(--font-display);
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: clamp(1.35rem, 4.2vw, 1.7rem);
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: center;
   color: var(--color-ink);
-  line-height: 1.25;
 }
 
-/* Hidden by default on desktop; fades in on row hover / focus. */
+/* Subtle delete — appears on hover / always on touch. */
 .deleteBtn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.6rem;
-  height: 1.6rem;
-  margin: 0 -0.2rem 0 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0;
   padding: 0;
   border: none;
   border-radius: var(--radius-sm);
@@ -93,36 +102,33 @@
 }
 
 .dishRow:hover .deleteBtn,
-.dishRow:focus-within .deleteBtn,
-.item:hover .deleteBtn,
-.item:focus-within .deleteBtn {
+.dishRow:focus-within .deleteBtn {
   opacity: 1;
   pointer-events: auto;
 }
 
 .deleteBtn:hover {
   color: var(--color-ink);
-  transform: scale(1.1);
+  transform: translateY(-50%) scale(1.08);
 }
 
 .deleteBtn:active {
-  transform: scale(0.96);
+  transform: translateY(-50%) scale(0.96);
 }
 
 .deleteIcon {
-  width: 0.85rem;
-  height: 0.85rem;
+  width: 0.8rem;
+  height: 0.8rem;
   stroke: currentColor;
-  stroke-width: 1.75;
+  stroke-width: 1.5;
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-/* Touch / narrow screens: always show the delete control. */
 @media (hover: none), (max-width: 640px) {
   .deleteBtn {
-    opacity: 1;
+    opacity: 0.75;
     pointer-events: auto;
   }
 }
@@ -132,10 +138,10 @@
   width: 100%;
   text-align: center;
   padding: var(--space-md);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  animation: fade-swap 220ms ease both;
+  border: 1px solid #e2d8cf;
+  border-radius: 12px;
+  background: transparent;
+  animation: panel-in 200ms ease both;
 }
 
 .message {
@@ -148,17 +154,17 @@
 .actions {
   display: flex;
   justify-content: center;
-  gap: var(--space-sm);
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .confirm,
 .cancel {
   appearance: none;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
-  padding: 0.55rem 1rem;
-  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.95rem;
+  border-radius: 8px;
   transition:
     background var(--transition),
     border-color var(--transition),
@@ -178,14 +184,14 @@
 }
 
 .cancel {
-  border: 1px solid var(--color-line);
+  border: 1px solid #ddd4cb;
   background: transparent;
-  color: var(--color-ink-muted);
+  color: #7d746c;
 }
 
 .cancel:hover {
   color: var(--color-ink);
-  border-color: var(--color-ink-muted);
+  border-color: #b9aea1;
 }
 
 .confirm:active,
@@ -193,10 +199,10 @@
   transform: scale(0.98);
 }
 
-@keyframes fade-swap {
+@keyframes panel-in {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;

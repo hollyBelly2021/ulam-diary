@@ -426,7 +426,7 @@
   width: 100%;
   text-align: center;
   margin-top: var(--space-sm);
-  animation: fade-swap 280ms ease both;
+  animation: fade-swap 200ms ease both;
 }
 
 .homeSummaryLabel {
@@ -452,7 +452,7 @@
 @keyframes fade-swap {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;

@@ -43,6 +43,6 @@ Then open the local URL shown in the terminal (usually `http://localhost:5173`).
 2. Tap **X** to reject and get another suggestion (same dish won’t repeat in a row when others are available).
 3. Tap the **checkmark** to save to **Today’s Table** (or **Restaurant Pick**).
 4. Returning on the same day shows your saved choices; a new day lets you choose again.
-5. Use **Reset Ulam List** to restore all dishes to the random pool without clearing history.
+5. Use **Reset Dish List** to restore all dishes to the random pool without clearing history.
 
 Data is stored only in your browser via `localStorage`.

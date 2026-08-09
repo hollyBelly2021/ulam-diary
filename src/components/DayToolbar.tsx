@@ -2,6 +2,11 @@ import type { PoolAddResult } from '../types'
 import type { DailyRestaurantEntry, Restaurant } from '../types/restaurant'
 import { type GeneratorMode } from './ActionArea'
 import { EatingOut } from './EatingOut'
+import {
+  type PastPickItem,
+  type PastPicksDay,
+  UlamHistory,
+} from './UlamHistory'
 import { UlamResult } from './UlamResult'
 import { WriteOwnUlam } from './WriteOwnUlam'
 import styles from './ActionArea.module.css'
@@ -9,6 +14,8 @@ import styles from './ActionArea.module.css'
 interface DayToolbarProps {
   writeOpen: boolean
   menuOpen: boolean
+  pastPicksOpen: boolean
+  pastPicks: PastPicksDay[]
   mode: GeneratorMode
   suggestion: string | null
   allTried: boolean
@@ -20,6 +27,8 @@ interface DayToolbarProps {
   onToggleWrite: () => void
   onCloseWrite: () => void
   onTogglePlate: () => void
+  onTogglePastPicks: () => void
+  onDeletePastPick: (date: string, item: PastPickItem) => void
   onAddCustomUlam: (rawName: string) => boolean
   onAddToPool: (rawName: string) => PoolAddResult
   onGenerate: () => void
@@ -32,11 +41,13 @@ interface DayToolbarProps {
 }
 
 /**
- * Centered home / write / plate nav and the single active interaction panel.
+ * Centered home / write / plate / past-picks nav and one active content panel.
  */
 export function DayToolbar({
   writeOpen,
   menuOpen,
+  pastPicksOpen,
+  pastPicks,
   mode,
   suggestion,
   allTried,
@@ -48,6 +59,8 @@ export function DayToolbar({
   onToggleWrite,
   onCloseWrite,
   onTogglePlate,
+  onTogglePastPicks,
+  onDeletePastPick,
   onAddCustomUlam,
   onAddToPool,
   onGenerate,
@@ -60,8 +73,9 @@ export function DayToolbar({
 }: DayToolbarProps) {
   const generating =
     (mode === 'ulam' && Boolean(suggestion)) || mode === 'eating-out'
-  const showPlateMenu = menuOpen && !writeOpen && !generating
-  const atHome = !writeOpen && !menuOpen && !generating
+  const showPlateMenu =
+    menuOpen && !writeOpen && !pastPicksOpen && !generating
+  const atHome = !writeOpen && !menuOpen && !pastPicksOpen && !generating
 
   return (
     <div className={styles.area} aria-live="polite">
@@ -111,16 +125,33 @@ export function DayToolbar({
             <circle cx="12" cy="12" r="5.75" />
           </svg>
         </button>
+
+        <button
+          type="button"
+          className={`${styles.navIcon}${
+            pastPicksOpen ? ` ${styles.iconActive}` : ''
+          }`}
+          aria-label="Past Picks"
+          aria-expanded={pastPicksOpen}
+          onClick={onTogglePastPicks}
+        >
+          <svg className={styles.navGlyph} viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="8.5" />
+            <path d="M12 7.5v5l3 2" />
+          </svg>
+        </button>
       </div>
 
-      <WriteOwnUlam
-        open={writeOpen}
-        onClose={onCloseWrite}
-        dishPool={dishPool}
-        todaysDishes={todaysDishes}
-        onAddToToday={onAddCustomUlam}
-        onAddToPool={onAddToPool}
-      />
+      {!pastPicksOpen && (
+        <WriteOwnUlam
+          open={writeOpen}
+          onClose={onCloseWrite}
+          dishPool={dishPool}
+          todaysDishes={todaysDishes}
+          onAddToToday={onAddCustomUlam}
+          onAddToPool={onAddToPool}
+        />
+      )}
 
       <div
         className={`${styles.menu}${showPlateMenu ? ` ${styles.menuOpen}` : ''}`}
@@ -154,7 +185,11 @@ export function DayToolbar({
         </div>
       </div>
 
-      {!writeOpen && mode === 'ulam' && suggestion && (
+      {pastPicksOpen && (
+        <UlamHistory days={pastPicks} onDeleteItem={onDeletePastPick} />
+      )}
+
+      {!writeOpen && !pastPicksOpen && mode === 'ulam' && suggestion && (
         <div className={styles.generatorSlot}>
           <UlamResult
             dishName={suggestion}
@@ -165,7 +200,7 @@ export function DayToolbar({
         </div>
       )}
 
-      {!writeOpen && mode === 'eating-out' && (
+      {!writeOpen && !pastPicksOpen && mode === 'eating-out' && (
         <div className={styles.generatorSlot}>
           <EatingOut
             todaysEntry={todaysRestaurant}

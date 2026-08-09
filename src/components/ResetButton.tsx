@@ -18,7 +18,7 @@ export function ResetButton({ onReset }: ResetButtonProps) {
       <div className={styles.wrapper}>
         <div className={styles.dialog} role="alertdialog" aria-labelledby="reset-title">
           <p id="reset-title" className={styles.message}>
-            Reset the available ulam list? Previously accepted dishes will be
+            Reset the available dish list? Previously accepted dishes will be
             choosable again. Your diary history will stay.
           </p>
           <div className={styles.actions}>
@@ -52,7 +52,7 @@ export function ResetButton({ onReset }: ResetButtonProps) {
         className={styles.resetButton}
         onClick={() => setConfirming(true)}
       >
-        Reset Ulam List
+        Reset Dish List
       </button>
     </div>
   )
