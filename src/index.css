@@ -74,7 +74,7 @@ button:disabled {
   outline-offset: 3px;
 }
 
-/* Subtle page enter */
+/* Subtle page enter — delayed until splash finishes */
 .app {
   width: min(100% - 2rem, var(--max-width));
   margin: 0 auto;
@@ -82,7 +82,16 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
-  animation: fade-in 420ms ease both;
+}
+
+.appHidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.appVisible {
+  animation: fade-in 800ms ease-in-out both;
 }
 
 @keyframes fade-in {

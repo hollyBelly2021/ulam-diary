@@ -1,0 +1,81 @@
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -20%, #ebe4da 0%, transparent 55%),
+    linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-soft) 100%);
+  pointer-events: all;
+  transition:
+    opacity 800ms ease-in-out,
+    visibility 800ms ease-in-out;
+}
+
+.splashOut {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.logoWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  opacity: 0;
+  transform: scale(0.9) translateY(0);
+}
+
+.logoEntering {
+  animation: logo-enter 600ms ease-in-out forwards;
+}
+
+.logoHolding {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.logoLeaving {
+  animation: logo-leave 800ms ease-in-out forwards;
+}
+
+.logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 0.9;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+@keyframes logo-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes logo-leave {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1) translateY(-12px);
+  }
+}
+
+@media (min-width: 480px) {
+  .logoWrap {
+    width: 160px;
+  }
+}

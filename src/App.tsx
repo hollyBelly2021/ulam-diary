@@ -9,6 +9,7 @@ import {
   type PastPicksDay,
 } from './components/UlamHistory'
 import { ResetButton } from './components/ResetButton'
+import { SplashScreen } from './components/SplashScreen'
 import type {
   DailyUlamEntry,
   DayDish,
@@ -112,6 +113,9 @@ export default function App() {
   const [writeOpen, setWriteOpen] = useState(false)
   /** Past Picks panel — mutually exclusive with other center panels. */
   const [pastPicksOpen, setPastPicksOpen] = useState(false)
+  /** Splash plays once per page load before the main UI is interactive. */
+  const [showSplash, setShowSplash] = useState(true)
+  const [appReady, setAppReady] = useState(false)
 
   // Keep a backup sync in case any update path misses an immediate write.
   useEffect(() => {
@@ -563,49 +567,62 @@ export default function App() {
   }
 
   return (
-    <div className="app">
-      <Header />
-      <DayToolbar
-        writeOpen={writeOpen}
-        menuOpen={menuOpen}
-        pastPicksOpen={pastPicksOpen}
-        pastPicks={pastPicks}
-        mode={generatorMode}
-        suggestion={suggestion}
-        allTried={allTried}
-        dishPool={dishPool}
-        todaysDishes={todaysDishNames}
-        todaysRestaurant={todaysRestaurant}
-        excludedRestaurantIds={state.excludedRestaurantIds}
-        onGoHome={handleGoHome}
-        onToggleWrite={handleToggleWrite}
-        onCloseWrite={handleCloseWrite}
-        onTogglePlate={handleTogglePlate}
-        onTogglePastPicks={handleTogglePastPicks}
-        onDeletePastPick={handleDeletePastPick}
-        onAddCustomUlam={handleAddCustomUlam}
-        onAddToPool={handleAddToPool}
-        onGenerate={handleGenerate}
-        onOpenEatingOut={handleOpenEatingOut}
-        onReject={handleReject}
-        onAccept={handleAccept}
-        onDismissSuggestion={handleDismissSuggestion}
-        onCloseEatingOut={handleCloseEatingOut}
-        onAcceptRestaurant={handleAcceptRestaurant}
-      />
-      {!pastPicksOpen && (
-        <>
-          <CurrentUlamToday
-            dishes={todaysDishNames}
-            onRemove={handleRemoveTodayDish}
-          />
-          <EatingOutToday
-            entry={todaysRestaurant}
-            onRemove={handleRemoveTodayRestaurant}
-          />
-        </>
+    <>
+      {showSplash && (
+        <SplashScreen
+          onComplete={() => {
+            setAppReady(true)
+            setShowSplash(false)
+          }}
+        />
       )}
-      <ResetButton onReset={handleResetList} />
-    </div>
+      <div
+        className={`app${appReady ? ' appVisible' : ' appHidden'}`}
+        aria-hidden={!appReady}
+      >
+        <Header />
+        <DayToolbar
+          writeOpen={writeOpen}
+          menuOpen={menuOpen}
+          pastPicksOpen={pastPicksOpen}
+          pastPicks={pastPicks}
+          mode={generatorMode}
+          suggestion={suggestion}
+          allTried={allTried}
+          dishPool={dishPool}
+          todaysDishes={todaysDishNames}
+          todaysRestaurant={todaysRestaurant}
+          excludedRestaurantIds={state.excludedRestaurantIds}
+          onGoHome={handleGoHome}
+          onToggleWrite={handleToggleWrite}
+          onCloseWrite={handleCloseWrite}
+          onTogglePlate={handleTogglePlate}
+          onTogglePastPicks={handleTogglePastPicks}
+          onDeletePastPick={handleDeletePastPick}
+          onAddCustomUlam={handleAddCustomUlam}
+          onAddToPool={handleAddToPool}
+          onGenerate={handleGenerate}
+          onOpenEatingOut={handleOpenEatingOut}
+          onReject={handleReject}
+          onAccept={handleAccept}
+          onDismissSuggestion={handleDismissSuggestion}
+          onCloseEatingOut={handleCloseEatingOut}
+          onAcceptRestaurant={handleAcceptRestaurant}
+        />
+        {!pastPicksOpen && (
+          <>
+            <CurrentUlamToday
+              dishes={todaysDishNames}
+              onRemove={handleRemoveTodayDish}
+            />
+            <EatingOutToday
+              entry={todaysRestaurant}
+              onRemove={handleRemoveTodayRestaurant}
+            />
+          </>
+        )}
+        <ResetButton onReset={handleResetList} />
+      </div>
+    </>
   )
 }
